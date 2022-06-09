@@ -30,7 +30,7 @@ const Message: FC<MessageProps> = (props: MessageProps) => {
 		<div className="flex w-full justify-start group hover:bg-discord-600 text-white text-sm py-1 mb-1">
 			{/* PFP */}
 			<div className="mx-3">
-				<div className="relative w-12 h-12">
+				<div className="relative z-0 w-12 h-12">
 					<Image
 						className="rounded-full aspect-square group-scope-hover:cursor-pointer"
 						alt={props.username}

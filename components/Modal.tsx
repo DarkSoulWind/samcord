@@ -15,7 +15,7 @@ const Modal: FC<ModalProps> = (props: ModalProps) => {
 		<div
 			className={`${
 				props.isOpen ? "scale-100" : "scale-0"
-			} absolute w-screen h-screen transition-all duration-500 z-10 flex items-center justify-center`}
+			} absolute w-screen h-screen transition-all duration-500 z-30 flex items-center justify-center`}
 		>
 			<div
 				className={`absolute w-full h-full ${

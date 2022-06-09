@@ -20,7 +20,7 @@ const SidebarItem: FC<SidebarItemProps> = (props: SidebarItemProps) => {
 			<props.icon className="w-7 h-7 fill-discord-100" />
 
 			{/* TOOLTIP */}
-			<div className="absolute left-[4.5rem] bg-discord-800 p-2 text-sm font-bold scale-0 rounded-md group-hover:scale-100 transition-all">
+			<div className="absolute z-10 left-[4.5rem] bg-discord-800 p-2 text-sm font-bold scale-0 rounded-md group-hover:scale-100 transition-all">
 				{props.tooltipMessage}
 			</div>
 

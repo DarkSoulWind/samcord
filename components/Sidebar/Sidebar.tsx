@@ -13,7 +13,7 @@ interface SidebarProps {
 
 const Sidebar: FC<SidebarProps> = (props: SidebarProps) => {
 	return (
-		<div className="fixed top-0 left-0 bg-discord-700 p-2 w-16 h-screen">
+		<div className="fixed top-0 z-20 left-0 bg-discord-700 p-2 w-16 h-screen">
 			<div className="flex flex-col gap-2 pb-4 justify-start items-center last:mt-auto h-screen">
 				<div>
 					<SidebarItem icon={FaFish} tooltipMessage="samcord" />
@@ -51,7 +51,7 @@ const Sidebar: FC<SidebarProps> = (props: SidebarProps) => {
 							}}
 						/>
 						<div className="relative">
-							<div className="absolute -right-1 bottom-0 w-6 h-6 border-[4px] border-discord-700 rounded-full bg-green-500"></div>
+							<div className="absolute group-scope -right-1 bottom-0 w-6 h-6 border-[4px] border-discord-700 rounded-full bg-green-500"></div>
 						</div>
 					</div>
 				)}

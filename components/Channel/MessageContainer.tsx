@@ -1,4 +1,4 @@
-import React, { FC } from "react";
+import React, { FC, MutableRefObject } from "react";
 import { FaHashtag, FaCuttlefish } from "react-icons/fa";
 import { useCollection } from "react-firebase-hooks/firestore";
 import { collection, query, orderBy, limit } from "firebase/firestore";
@@ -11,6 +11,7 @@ import Message from "./Message";
 interface MessageContainerProps {
 	channelName: string;
 	user: User | null | undefined;
+	scrollToBottomRef: MutableRefObject<any>;
 }
 
 const roots = ["the police", "Harry Azaan", "Sally Azan"];
@@ -58,6 +59,7 @@ const MessageContainer: FC<MessageContainerProps> = (
 							This is the start of the #{props.channelName}{" "}
 							channel
 						</div>
+						{/* // DATE SEPARATOR */}
 						<div className="flex justify-center mb-3">
 							<div className="w-[97%] border-b-2 border-discord-300">
 								<div className="relative flex justify-center">
@@ -90,6 +92,8 @@ const MessageContainer: FC<MessageContainerProps> = (
 						text={message.text}
 					/>
 				))}
+			{/* SCROLL TO BOTTOM */}
+			<div ref={props.scrollToBottomRef}></div>
 		</div>
 	);
 };

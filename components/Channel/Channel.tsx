@@ -1,5 +1,5 @@
 import { User } from "firebase/auth";
-import React, { FC, useState } from "react";
+import React, { FC, useState, useRef } from "react";
 import { FaHashtag, FaPaperPlane } from "react-icons/fa";
 import { Timestamp, collection, addDoc } from "firebase/firestore";
 import { db } from "../../firebase-config";
@@ -15,6 +15,7 @@ interface ChannelProps {
 const Channel: FC<ChannelProps> = (props: ChannelProps) => {
 	const [textInput, setTextInput] = useState("");
 	const messagesRef = collection(db, "messages");
+	const scrollToBottomRef = useRef<null | HTMLDivElement>(null);
 	const censor = new CensorSensor();
 
 	const submitMessage = async () => {
@@ -29,6 +30,7 @@ const Channel: FC<ChannelProps> = (props: ChannelProps) => {
 		};
 
 		await addDoc(messagesRef, data);
+		scrollToBottomRef?.current?.scrollIntoView({ behavior: "smooth" });
 	};
 
 	return (
@@ -39,7 +41,11 @@ const Channel: FC<ChannelProps> = (props: ChannelProps) => {
 				<div className="font-bold text-sm">{props.name}</div>
 			</div>
 
-			<MessageContainer channelName={props.name} user={props.user} />
+			<MessageContainer
+				channelName={props.name}
+				user={props.user}
+				scrollToBottomRef={scrollToBottomRef}
+			/>
 
 			{/* Text input box */}
 			<form
