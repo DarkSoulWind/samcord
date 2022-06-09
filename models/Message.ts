@@ -1,7 +1,7 @@
 import { Timestamp } from "firebase/firestore";
 
 export interface Message {
-	id?: string;
+	id: string;
 	date: Timestamp;
 	pfp: string;
 	username: string;

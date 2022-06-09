@@ -45,8 +45,8 @@ const Home: NextPage = () => {
 				title={user ? "Logout" : "Login"}
 				description={
 					user
-						? "You are already logged in."
-						: "You must be logged in with Google."
+						? `You are logged in as ${user.displayName}.`
+						: "You must be logged in with Google to send messages."
 				}
 				actionButtonText={user ? "Logout" : "Login"}
 				onActionButtonClick={() =>

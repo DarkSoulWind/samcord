@@ -4,15 +4,18 @@ import { useCollection } from "react-firebase-hooks/firestore";
 import { collection, query, orderBy, limit } from "firebase/firestore";
 import { db } from "../../firebase-config";
 import { Message as MessageModel } from "../../models/Message";
+import { User } from "firebase/auth";
+
 import Message from "./Message";
 
 interface MessageContainerProps {
 	channelName: string;
+	user: User | null | undefined;
 }
 
 const LoadingAnimation: FC = () => {
 	return (
-		<div className="absolute w-screen h-screen overflow-hidden flex justify-center items-center">
+		<div className="absolute w-full h-full overflow-hidden flex justify-center items-center">
 			<div className="flex flex-col items-center">
 				<FaCuttlefish className="w-24 h-24 animate-spin m-3 fill-discord-200" />
 				<div className="font-3xl text-discord-200">
@@ -74,6 +77,10 @@ const MessageContainer: FC<MessageContainerProps> = (
 				messages?.map((message) => (
 					<Message
 						key={message.id}
+						id={message.id}
+						belongsToCurrentUser={
+							props.user?.displayName === message.username
+						}
 						date={message.date.toDate()}
 						pfp={message.pfp}
 						username={message.username}

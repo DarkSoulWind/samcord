@@ -37,7 +37,7 @@ const Channel: FC<ChannelProps> = (props: ChannelProps) => {
 				<div className="font-bold text-sm">{props.name}</div>
 			</div>
 
-			<MessageContainer channelName={props.name} />
+			<MessageContainer channelName={props.name} user={props.user} />
 
 			{/* Text input box */}
 			<form
@@ -57,7 +57,7 @@ const Channel: FC<ChannelProps> = (props: ChannelProps) => {
 					placeholder={
 						props.user
 							? `Message #${props.name}`
-							: "You must be signed in to send messages"
+							: "You must be logged in to send messages"
 					}
 					value={textInput}
 					onChange={(e) => {
@@ -67,7 +67,9 @@ const Channel: FC<ChannelProps> = (props: ChannelProps) => {
 				/>
 				<button
 					type="submit"
-					className="w-10 h-10 aspect-square bg-discord-200 rounded-full flex justify-center items-center"
+					className={`${
+						props.user ? "block" : "hidden"
+					} w-10 h-10 aspect-square bg-discord-200 rounded-full flex justify-center items-center`}
 					disabled={!props.user}
 				>
 					<FaPaperPlane className="w-5 h-5 fill-white active:opacity-50 transition-all ease-in" />
