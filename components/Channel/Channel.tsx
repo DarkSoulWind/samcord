@@ -1,14 +1,36 @@
-import React, { FC } from "react";
+import { User } from "firebase/auth";
+import React, { FC, useState } from "react";
 import { FaHashtag, FaPaperPlane } from "react-icons/fa";
+import { Timestamp, collection, addDoc } from "firebase/firestore";
+import { db } from "../../firebase-config";
+
 import MessageContainer from "./MessageContainer";
 
 interface ChannelProps {
 	name: string;
+	user: User | null | undefined;
 }
 
 const Channel: FC<ChannelProps> = (props: ChannelProps) => {
+	const [textInput, setTextInput] = useState("");
+	const messagesRef = collection(db, "messages");
+
+	const submitMessage = async () => {
+		if (textInput.trim() === "") return;
+		setTextInput("");
+
+		const data = {
+			date: Timestamp.now(),
+			pfp: props.user?.photoURL,
+			username: props.user?.displayName,
+			text: textInput,
+		};
+
+		await addDoc(messagesRef, data);
+	};
+
 	return (
-		<div className="ml-16 py-2 flex flex-col h-screen text-white">
+		<div className="ml-16 py-2 flex flex-col h-screen text-white overflow-hidden">
 			{/* Channel name */}
 			<div className="w-full flex gap-1 justify-start items-center border-b-[1px] pb-2 border-b-discord-700">
 				<FaHashtag className="w-4 h-4 fill-discord-100 ml-3" />
@@ -19,21 +41,36 @@ const Channel: FC<ChannelProps> = (props: ChannelProps) => {
 
 			{/* Text input box */}
 			<form
-				className="mt-auto px-3 flex"
+				className="mt-auto px-3 w-full flex"
 				autoComplete="off"
 				autoCapitalize="off"
 				spellCheck="false"
+				onSubmit={(e) => {
+					e.preventDefault();
+					if (!props.user) return;
+					submitMessage();
+				}}
 			>
 				<input
-					className="mt-auto text-white placeholder:text-opacity-0 w-[95%] mr-2 mb-2 outline-none rounded-md bg-discord-300 py-3 px-4 text-xs"
+					className="mt-auto text-white placeholder:text-opacity-0 w-full mr-2 mb-2 outline-none rounded-md bg-discord-300 py-3 px-4 text-xs"
 					type="text"
-					placeholder="Message @urmum"
+					placeholder={
+						props.user
+							? `Message #${props.name}`
+							: "You must be signed in to send messages"
+					}
+					value={textInput}
+					onChange={(e) => {
+						setTextInput(e.target.value);
+					}}
+					disabled={!props.user}
 				/>
 				<button
 					type="submit"
-					className="w-10 h-10 group-scope bg-discord-200 rounded-full flex justify-center items-center"
+					className="w-10 h-10 aspect-square bg-discord-200 rounded-full flex justify-center items-center"
+					disabled={!props.user}
 				>
-					<FaPaperPlane className="w-5 h-5 fill-white group-scope-active:opacity-60 transition-all ease-in" />
+					<FaPaperPlane className="w-5 h-5 fill-white active:opacity-50 transition-all ease-in" />
 				</button>
 			</form>
 		</div>

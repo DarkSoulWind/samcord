@@ -1,3 +1,4 @@
+import { User } from "firebase/auth";
 import React, { Dispatch, FC, SetStateAction } from "react";
 import { FaFish, FaCog } from "react-icons/fa";
 import SidebarItem from "./SidebarItem";
@@ -5,6 +6,7 @@ import SidebarItem from "./SidebarItem";
 interface SidebarProps {
 	showLogin: boolean;
 	setShowLogin: Dispatch<SetStateAction<boolean>>;
+	user: User | null | undefined;
 }
 
 const Sidebar: FC<SidebarProps> = (props: SidebarProps) => {
@@ -14,7 +16,7 @@ const Sidebar: FC<SidebarProps> = (props: SidebarProps) => {
 				<SidebarItem icon={FaFish} tooltipMessage="samcord" />
 				<SidebarItem
 					icon={FaCog}
-					tooltipMessage="Settings"
+					tooltipMessage={props.user ? "Logout" : "Login"}
 					onClick={() => {
 						props.setShowLogin(true);
 					}}

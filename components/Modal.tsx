@@ -6,6 +6,7 @@ interface ModalProps {
 	title: string;
 	description: string;
 	actionButtonText: string;
+	loadingState?: boolean;
 	onActionButtonClick: () => void;
 }
 
@@ -43,13 +44,18 @@ const Modal: FC<ModalProps> = (props: ModalProps) => {
 							Cancel
 						</button>
 						<button
-							className="bg-red-500 hover:bg-red-800 transition-all py-1 px-4 rounded-sm"
+							className={`${
+								props.loadingState ? "bg-red-800" : "bg-red-500"
+							} hover:bg-red-800 transition-all py-1 px-4 rounded-sm`}
 							onClick={() => {
 								props.onActionButtonClick();
 								props.setIsOpen(false);
 							}}
+							disabled={props.loadingState}
 						>
-							{props.actionButtonText}
+							{props.loadingState
+								? "Loading..."
+								: props.actionButtonText}
 						</button>
 					</div>
 				</div>
