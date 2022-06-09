@@ -1,4 +1,5 @@
 import type { NextPage } from "next";
+import Head from "next/head";
 import { useState } from "react";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { signInWithPopup, signOut } from "firebase/auth";
@@ -34,6 +35,15 @@ const Home: NextPage = () => {
 
 	return (
 		<div className="bg-discord-500 font-sans w-screen h-screen">
+			<Head>
+				{/* favicon */}
+				<link
+					rel="icon"
+					href="https://samsoongterminal.harryazaan.repl.co/assets/favicon.ico"
+					type="image/x-icon"
+				/>
+				<title>Samcord</title>
+			</Head>
 			<Sidebar
 				showLogin={showLogin}
 				setShowLogin={setShowLogin}

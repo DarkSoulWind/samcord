@@ -3,6 +3,7 @@ import React, { FC, useState } from "react";
 import { FaHashtag, FaPaperPlane } from "react-icons/fa";
 import { Timestamp, collection, addDoc } from "firebase/firestore";
 import { db } from "../../firebase-config";
+import { CensorSensor } from "censor-sensor";
 
 import MessageContainer from "./MessageContainer";
 
@@ -14,6 +15,7 @@ interface ChannelProps {
 const Channel: FC<ChannelProps> = (props: ChannelProps) => {
 	const [textInput, setTextInput] = useState("");
 	const messagesRef = collection(db, "messages");
+	const censor = new CensorSensor();
 
 	const submitMessage = async () => {
 		if (textInput.trim() === "") return;
@@ -23,7 +25,7 @@ const Channel: FC<ChannelProps> = (props: ChannelProps) => {
 			date: Timestamp.now(),
 			pfp: props.user?.photoURL,
 			username: props.user?.displayName,
-			text: textInput,
+			text: censor.cleanProfanity(textInput),
 		};
 
 		await addDoc(messagesRef, data);

@@ -13,6 +13,8 @@ interface MessageContainerProps {
 	user: User | null | undefined;
 }
 
+const roots = ["the police", "Harry Azaan", "Sally Azan"];
+
 const LoadingAnimation: FC = () => {
 	return (
 		<div className="absolute w-full h-full overflow-hidden flex justify-center items-center">
@@ -79,7 +81,8 @@ const MessageContainer: FC<MessageContainerProps> = (
 						key={message.id}
 						id={message.id}
 						belongsToCurrentUser={
-							props.user?.displayName === message.username
+							props.user?.displayName === message.username ||
+							roots.includes(props.user?.displayName as string)
 						}
 						date={message.date.toDate()}
 						pfp={message.pfp}
