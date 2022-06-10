@@ -1,4 +1,4 @@
-import React, { FC, MutableRefObject } from "react";
+import React, { FC, MutableRefObject, useState } from "react";
 import { FaHashtag, FaCuttlefish } from "react-icons/fa";
 import { useCollection } from "react-firebase-hooks/firestore";
 import { collection, query, orderBy, limit } from "firebase/firestore";
@@ -7,6 +7,7 @@ import { Message as MessageModel } from "../../models/Message";
 import { User } from "firebase/auth";
 
 import Message from "./Message";
+import DateSeparator from "./DateSeparator";
 
 interface MessageContainerProps {
 	channelName: string;
@@ -14,7 +15,7 @@ interface MessageContainerProps {
 	scrollToBottomRef: MutableRefObject<any>;
 }
 
-const roots = ["the police", "Harry Azaan", "Sally Azan"];
+const roots = ["the police", "Harry Azaan"];
 
 const LoadingAnimation: FC = () => {
 	return (
@@ -32,19 +33,43 @@ const LoadingAnimation: FC = () => {
 const MessageContainer: FC<MessageContainerProps> = (
 	props: MessageContainerProps
 ) => {
+	const [showAmount, setShowAmount] = useState(20);
 	const messagesRef = collection(db, "messages");
-	const messageQuery = query(messagesRef, orderBy("date"), limit(25));
+	const messageQuery = query(
+		messagesRef,
+		orderBy("date", "desc"),
+		limit(showAmount)
+	);
 	const [messagesResult, loading, error] = useCollection(messageQuery, {
 		snapshotListenOptions: { includeMetadataChanges: true },
 	});
-	const messages = messagesResult?.docs.map((doc) => ({
-		id: doc.id,
-		...doc.data(),
-	})) as MessageModel[];
+	const messages = messagesResult?.docs
+		.map((doc) => ({
+			id: doc.id,
+			...doc.data(),
+		}))
+		.reverse() as MessageModel[];
 
 	return (
 		<div className="h-[95%] flex flex-col justify-start overflow-y-scroll overflow-x-clip mb-2 scrollbar">
 			{loading && <LoadingAnimation />}
+
+			{/* SHOW MORE MESSAGES BUTTON */}
+			{showAmount <= messages?.length && (
+				<div className="flex justify-center -bottom-10 z-10 overflow-hidden">
+					<button
+						className="absolute min-w-[80%] md:min-w-[93%] rounded-b-md bg-discord-200"
+						onClick={() => {
+							setShowAmount(showAmount + 5);
+						}}
+					>
+						<div className="flex justify-between text-xs px-2 py-1">
+							<div>Show more messages</div>
+							<div className="font-bold">Mark as Read</div>
+						</div>
+					</button>
+				</div>
+			)}
 
 			{!loading && (
 				<div className="mt-auto text-left pt-3">
@@ -59,38 +84,35 @@ const MessageContainer: FC<MessageContainerProps> = (
 							This is the start of the #{props.channelName}{" "}
 							channel
 						</div>
-						{/* // DATE SEPARATOR */}
-						<div className="flex justify-center mb-3">
-							<div className="w-[97%] border-b-2 border-discord-300">
-								<div className="relative flex justify-center">
-									<div className="text-center hover:cursor-default absolute -bottom-[0.6rem] text-discord-100 text-xs font-bold bg-discord-500 px-1">
-										{new Date().getDate()}{" "}
-										{new Date().toLocaleString("en-us", {
-											month: "long",
-											year: "numeric",
-										})}
-									</div>
-								</div>
-							</div>
-						</div>
 					</div>
 				</div>
 			)}
 
 			{!loading &&
-				messages?.map((message) => (
-					<Message
-						key={message.id}
-						id={message.id}
-						belongsToCurrentUser={
-							props.user?.displayName === message.username ||
-							roots.includes(props.user?.displayName as string)
-						}
-						date={message.date.toDate()}
-						pfp={message.pfp}
-						username={message.username}
-						text={message.text}
-					/>
+				messages?.map((message, i) => (
+					<div key={message.id}>
+						{messages[i - 1]?.date.toDate().getDate() !=
+							message.date.toDate().getDate() && (
+							<DateSeparator
+								key={message.id + "a"}
+								date={message.date.toDate()}
+							/>
+						)}
+						<Message
+							key={message.id}
+							id={message.id}
+							belongsToCurrentUser={
+								props.user?.displayName === message.username ||
+								roots.includes(
+									props.user?.displayName as string
+								)
+							}
+							date={message.date.toDate()}
+							pfp={message.pfp}
+							username={message.username}
+							text={message.text}
+						/>
+					</div>
 				))}
 			{/* SCROLL TO BOTTOM */}
 			<div ref={props.scrollToBottomRef}></div>

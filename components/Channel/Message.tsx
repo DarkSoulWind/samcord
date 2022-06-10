@@ -49,7 +49,12 @@ const Message: FC<MessageProps> = (props: MessageProps) => {
 						{props.username}
 					</span>{" "}
 					<span className="text-[0.6rem] text-discord-100">
-						Today at {dateString}
+						{new Date().getDate() == props.date.getDate()
+							? "Today"
+							: `${props.date.getDate()}/${
+									props.date.getMonth() + 1
+							  }/${props.date.getFullYear()}`}{" "}
+						at {dateString}
 					</span>
 					<div>{props.text}</div>
 				</div>
@@ -58,7 +63,7 @@ const Message: FC<MessageProps> = (props: MessageProps) => {
 			{/* SHOW DELETE BUTTON IF THE MESSAGE BELONGS TO CURRENT USER */}
 			{props.belongsToCurrentUser && (
 				<div className="relative">
-					<button className="absolute hidden group-hover:block text-white -top-7 bg-discord-500 hover:bg-discord-300 transition-all border-[1px] border-discord-700 p-1 right-5">
+					<button className="absolute hidden group-hover:block text-white -top-6 bg-discord-500 hover:bg-discord-300 transition-all border-[1px] border-discord-700 p-1 right-5">
 						<div className="group-scope" onClick={deleteMessage}>
 							<FaTrash className="w-5 h-5 fill-red-600" />
 							<div className="absolute -right-3 -top-11 bg-discord-800 p-2 scale-0 group-scope-hover:scale-100 transition-all rounded-md text-sm">
