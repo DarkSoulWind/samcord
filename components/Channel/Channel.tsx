@@ -3,12 +3,8 @@ import React, { FC, useState, useRef, ChangeEvent } from "react";
 import { FaHashtag, FaPaperPlane, FaPlus, FaTrash } from "react-icons/fa";
 import { Timestamp, collection, addDoc } from "firebase/firestore";
 import { db, storage } from "../../firebase-config";
-import {
-	ref,
-	uploadBytes,
-	uploadBytesResumable,
-	getDownloadURL,
-} from "firebase/storage";
+import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
+import Image from "next/image";
 import { CensorSensor } from "censor-sensor";
 
 import MessageContainer from "./MessageContainer";
@@ -32,11 +28,13 @@ const Channel: FC<ChannelProps> = (props: ChannelProps) => {
 	const [selectedImage, setSelectedImage] = useState<SelectedImage | null>(
 		null
 	);
+	const [viewingImage, setViewingImage] = useState("");
+
 	const messagesRef = collection(db, "messages");
-	// const selectedImageRef = useRef<HTMLImageElement | null>(null);
 	const scrollToBottomRef = useRef<null | HTMLDivElement>(null);
 	const textInputRef = useRef<HTMLInputElement>(null);
 	const imageInputRef = useRef<HTMLInputElement>(null);
+
 	const censor = new CensorSensor();
 
 	const checkValidFilename = (filePath: string) => {
@@ -129,10 +127,41 @@ const Channel: FC<ChannelProps> = (props: ChannelProps) => {
 
 	return (
 		<div className="ml-16 py-2 flex flex-col h-screen text-white overflow-hidden">
-			{/* Channel name */}
+			{/* CHANNEL NAME */}
 			<div className="w-full flex gap-1 justify-start items-center border-b-[1px] pb-2 border-b-discord-700">
 				<FaHashtag className="w-4 h-4 fill-discord-100 ml-3" />
 				<div className="font-bold text-sm">{props.name}</div>
+			</div>
+
+			{/* IMAGE VIEWER */}
+			<div
+				className={`${
+					viewingImage.trim() == "" ? "scale-0" : "scale-100"
+				} fixed top-0 left-0 w-screen h-screen bg-black bg-opacity-70 z-50 transition-all duration-500 flex justify-center items-center`}
+			>
+				<div className="flex h-full gap-10 justify-center">
+					<button
+						onClick={() => setViewingImage("")}
+						className="m-2 px-4 py-[0.1rem] md:py-1 rounded-md bg-discord-200 hover:opacity-60 transition-all font-bold absolute top-0 left-0 text-sm md:text-base"
+					>
+						Close
+					</button>
+					<button
+						onClick={() => window.open(viewingImage, "_blank")}
+						className="mt-2 ml-24 px-4 py-[0.1rem] md:py-1 rounded-md bg-discord-200 hover:opacity-60 transition-all font-bold absolute top-0 left-0 text-sm md:text-base"
+					>
+						Open original
+					</button>
+				</div>
+				<div className="relative w-[75%] h-[75%] md:w-[85%] md:h-[85%]">
+					{viewingImage.trim() != "" && (
+						<Image
+							src={viewingImage}
+							layout="fill"
+							objectFit="contain"
+						/>
+					)}
+				</div>
 			</div>
 
 			{/* ALL MESSAGES ARE HERE */}
@@ -140,6 +169,7 @@ const Channel: FC<ChannelProps> = (props: ChannelProps) => {
 				channelName={props.name}
 				user={props.user}
 				scrollToBottomRef={scrollToBottomRef}
+				setViewingImage={setViewingImage}
 			/>
 
 			{/* SHOW IMAGE ATTACHMENT */}

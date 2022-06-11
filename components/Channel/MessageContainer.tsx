@@ -1,4 +1,10 @@
-import React, { FC, MutableRefObject, useState } from "react";
+import React, {
+	FC,
+	MutableRefObject,
+	useState,
+	Dispatch,
+	SetStateAction,
+} from "react";
 import { FaHashtag, FaCuttlefish } from "react-icons/fa";
 import { useCollection } from "react-firebase-hooks/firestore";
 import { collection, query, orderBy, limit } from "firebase/firestore";
@@ -13,13 +19,14 @@ interface MessageContainerProps {
 	channelName: string;
 	user: User | null | undefined;
 	scrollToBottomRef: MutableRefObject<any>;
+	setViewingImage: Dispatch<SetStateAction<string>>;
 }
 
 const roots = ["the police", "Harry Azaan"];
 
 const LoadingAnimation: FC = () => {
 	return (
-		<div className="absolute w-full h-full overflow-hidden flex justify-center items-center">
+		<div className="fixed w-full h-full overflow-hidden flex justify-center items-center">
 			<div className="flex flex-col items-center">
 				<FaCuttlefish className="w-24 h-24 animate-spin m-3 fill-discord-200" />
 				<div className="font-3xl text-discord-200">
@@ -34,6 +41,7 @@ const MessageContainer: FC<MessageContainerProps> = (
 	props: MessageContainerProps
 ) => {
 	const [showAmount, setShowAmount] = useState(20);
+	const showMore = 20;
 	const messagesRef = collection(db, "messages");
 	const messageQuery = query(
 		messagesRef,
@@ -60,7 +68,7 @@ const MessageContainer: FC<MessageContainerProps> = (
 					<button
 						className="absolute min-w-[80%] md:min-w-[90%] lg:min-w-[95%] rounded-b-md bg-discord-200"
 						onClick={() => {
-							setShowAmount(showAmount + 5);
+							setShowAmount(showAmount + showMore);
 						}}
 					>
 						<div className="flex justify-between text-xs px-2 py-1">
@@ -88,6 +96,7 @@ const MessageContainer: FC<MessageContainerProps> = (
 				</div>
 			)}
 
+			{/* DISPLAY ALL MESSAGES */}
 			{!loading &&
 				messages?.map((message, i) => (
 					<div key={message.id}>
@@ -113,6 +122,7 @@ const MessageContainer: FC<MessageContainerProps> = (
 							text={message.text}
 							imageURL={message.imageURL}
 							imageName={message.imageName}
+							setViewingImage={props.setViewingImage}
 						/>
 					</div>
 				))}

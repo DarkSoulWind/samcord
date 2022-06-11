@@ -1,4 +1,4 @@
-import React, { FC } from "react";
+import React, { FC, Dispatch, SetStateAction } from "react";
 import { FaTrash } from "react-icons/fa";
 import Image from "next/image";
 import { db } from "../../firebase-config";
@@ -15,6 +15,7 @@ interface MessageProps {
 	text: string;
 	imageURL: string | null;
 	imageName: string | null;
+	setViewingImage: Dispatch<SetStateAction<string>>;
 }
 
 const Message: FC<MessageProps> = (props: MessageProps) => {
@@ -70,13 +71,20 @@ const Message: FC<MessageProps> = (props: MessageProps) => {
 
 				{/* IMAGE ATTACHMENT */}
 				{props.imageURL && (
-					<div className="relative my-2 xs:my-0 h-80 max-h-96">
-						<Image
-							src={props.imageURL}
-							loading="lazy"
-							layout="fill"
-							objectFit="contain"
-						/>
+					<div
+						onClick={() =>
+							props.setViewingImage(props.imageURL as string)
+						}
+						className="relative mt-3 hover:cursor-pointer w-full flex flex-start"
+					>
+						<div className="my-2 xs:my-0 h-80 pr-auto max-h-96">
+							<Image
+								src={props.imageURL}
+								loading="lazy"
+								layout="fill"
+								objectFit="contain"
+							/>
+						</div>
 					</div>
 				)}
 			</div>

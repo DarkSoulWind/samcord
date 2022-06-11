@@ -43,6 +43,7 @@ const Home: NextPage = () => {
 					type="image/x-icon"
 				/>
 				<title>Samcord</title>
+				<meta name="description" content="Discord but made by Salman" />
 			</Head>
 			<Sidebar
 				showLogin={showLogin}
