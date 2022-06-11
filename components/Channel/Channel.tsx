@@ -1,8 +1,14 @@
 import { User } from "firebase/auth";
-import React, { FC, useState, useRef } from "react";
-import { FaHashtag, FaPaperPlane } from "react-icons/fa";
+import React, { FC, useState, useRef, ChangeEvent } from "react";
+import { FaHashtag, FaPaperPlane, FaPlus, FaTrash } from "react-icons/fa";
 import { Timestamp, collection, addDoc } from "firebase/firestore";
-import { db } from "../../firebase-config";
+import { db, storage } from "../../firebase-config";
+import {
+	ref,
+	uploadBytes,
+	uploadBytesResumable,
+	getDownloadURL,
+} from "firebase/storage";
 import { CensorSensor } from "censor-sensor";
 
 import MessageContainer from "./MessageContainer";
@@ -12,25 +18,113 @@ interface ChannelProps {
 	user: User | null | undefined;
 }
 
+interface SelectedImage {
+	file?: File;
+	src?: string;
+	name?: string;
+}
+
+const acceptableExtensions = [".jpg", ".jpeg", ".png"];
+
 const Channel: FC<ChannelProps> = (props: ChannelProps) => {
 	const [textInput, setTextInput] = useState("");
+	const [imageUploadProgress, setImageUploadProgress] = useState(0);
+	const [selectedImage, setSelectedImage] = useState<SelectedImage | null>(
+		null
+	);
 	const messagesRef = collection(db, "messages");
+	// const selectedImageRef = useRef<HTMLImageElement | null>(null);
 	const scrollToBottomRef = useRef<null | HTMLDivElement>(null);
+	const textInputRef = useRef<HTMLInputElement>(null);
+	const imageInputRef = useRef<HTMLInputElement>(null);
 	const censor = new CensorSensor();
+
+	const checkValidFilename = (filePath: string) => {
+		if (censor.isProfaneIsh(filePath)) {
+			return false;
+		}
+		for (const extension of acceptableExtensions) {
+			if (filePath.endsWith(extension)) {
+				return true;
+			}
+		}
+		return false;
+	};
+
+	const handleImage = (e: ChangeEvent<HTMLInputElement>) => {
+		if (!e.target.files) return;
+
+		const file = e.target.files?.[0];
+		const name = file?.name;
+		if (name && !checkValidFilename(name)) {
+			e.target.files = null;
+			e.target.value = "";
+			return;
+		}
+		const blobFile = e.target.files?.[0] as Blob;
+		let reader = new FileReader();
+
+		reader.onload = (e) => {
+			setSelectedImage({ src: e?.target?.result as string, name, file });
+		};
+		reader.readAsDataURL(blobFile);
+	};
+
+	const fileUpload = async (image: SelectedImage | null) => {
+		if (!image) return;
+		return new Promise<string>((resolve, reject) => {
+			const { file, name } = image;
+			if (!file) reject();
+			console.log(name);
+			const uploadedImagesRef = ref(storage, `images/${name}`);
+			const uploadTask = uploadBytesResumable(
+				uploadedImagesRef,
+				file as Blob
+			);
+			uploadTask.on(
+				"state_changed",
+				(snapshot) => {
+					const progress =
+						(snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+					console.log(`Upload is ${progress}% done`);
+					setImageUploadProgress(progress);
+				},
+				(error: any) => {
+					console.log(error);
+					reject(error);
+				},
+				() => {
+					getDownloadURL(uploadedImagesRef).then((url) => {
+						console.log(`The image is at ${url}`);
+						resolve(url);
+					});
+				}
+			);
+		});
+	};
 
 	const submitMessage = async () => {
 		if (textInput.trim() === "") return;
-		setTextInput("");
 
-		const data = {
+		let imageURL = await fileUpload(selectedImage);
+		let imageName = selectedImage?.name;
+		console.log(imageName);
+
+		let data = {
 			date: Timestamp.now(),
 			pfp: props.user?.photoURL,
 			username: props.user?.displayName,
 			text: censor.cleanProfanity(textInput),
+			imageURL: imageURL || null,
+			imageName: imageName || null,
 		};
 
 		await addDoc(messagesRef, data);
 		scrollToBottomRef?.current?.scrollIntoView({ behavior: "smooth" });
+		textInputRef.current?.focus();
+		setTextInput("");
+		setSelectedImage(null);
+		setImageUploadProgress(0);
 	};
 
 	return (
@@ -41,11 +135,48 @@ const Channel: FC<ChannelProps> = (props: ChannelProps) => {
 				<div className="font-bold text-sm">{props.name}</div>
 			</div>
 
+			{/* ALL MESSAGES ARE HERE */}
 			<MessageContainer
 				channelName={props.name}
 				user={props.user}
 				scrollToBottomRef={scrollToBottomRef}
 			/>
+
+			{/* SHOW IMAGE ATTACHMENT */}
+			{selectedImage && (
+				<div>
+					<div className="flex w-full bg-discord-300 flex-start p-3">
+						<div className="bg-discord-600 rounded-md pt-2 px-5">
+							<img src={selectedImage.src} className="max-h-40" />
+							<div className="text-xs my-2">
+								{selectedImage.name}
+							</div>
+						</div>
+						{/* REMOVE ATTACHMENT BUTTON */}
+						<div
+							className="relative"
+							onClick={(e) => {
+								setSelectedImage(null);
+								imageInputRef.current!.value = "";
+								imageInputRef.current!.files = null;
+							}}
+						>
+							<div className="absolute -top-1 -right-3 bg-discord-500 hover:bg-discord-300 p-1 rounded-sm border-[1px] border-discord-700 group">
+								<FaTrash className="fill-red-600" />
+								<div className="absolute scale-0 group-hover:scale-100 transition-all -right-6 bg-discord-800 p-1 rounded-md text-xs text-white -top-11">
+									Remove Attachment
+								</div>
+							</div>
+						</div>
+					</div>
+					{/* PROGRESS BAR */}
+					<div className="flex mb-2 justify-start w-full">
+						<div
+							className={`w-[${imageUploadProgress}%] bg-discord-200 h-1 transition-all`}
+						></div>
+					</div>
+				</div>
+			)}
 
 			{/* Text input box */}
 			<form
@@ -59,6 +190,26 @@ const Channel: FC<ChannelProps> = (props: ChannelProps) => {
 					submitMessage();
 				}}
 			>
+				{/* IMAGE UPLOAD BUTTON */}
+				<div
+					onClick={() => imageInputRef.current?.click()}
+					className={`${
+						props.user ? "block" : "hidden"
+					} bg-discord-200 hover:cursor-pointer hover:opacity-60 w-10 h-10 transition-all rounded-full aspect-square mr-2 flex items-center justify-center`}
+				>
+					<FaPlus className="w-5 h-5" />
+
+					<input
+						type="file"
+						className="w-full h-full hidden opacity-0 file:hidden"
+						onChange={handleImage}
+						ref={imageInputRef}
+						name=""
+						id=""
+					/>
+				</div>
+
+				{/* TEXT INPUT */}
 				<input
 					className="mt-auto text-white placeholder:text-opacity-0 w-full mr-2 mb-2 outline-none rounded-md bg-discord-300 py-3 px-4 text-xs"
 					type="text"
@@ -72,12 +223,14 @@ const Channel: FC<ChannelProps> = (props: ChannelProps) => {
 						setTextInput(e.target.value);
 					}}
 					disabled={!props.user}
+					ref={textInputRef}
 				/>
+				{/* SUBMIT BUTTON */}
 				<button
 					type="submit"
 					className={`${
 						props.user ? "block" : "hidden"
-					} w-10 h-10 aspect-square bg-discord-200 rounded-full flex justify-center items-center`}
+					} w-10 h-10 aspect-square bg-discord-200 rounded-full flex justify-center hover:opacity-60 transition-all items-center`}
 					disabled={!props.user}
 				>
 					<FaPaperPlane className="w-5 h-5 fill-white active:opacity-50 transition-all ease-in" />

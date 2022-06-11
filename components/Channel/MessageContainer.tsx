@@ -58,7 +58,7 @@ const MessageContainer: FC<MessageContainerProps> = (
 			{showAmount <= messages?.length && (
 				<div className="flex justify-center -bottom-10 z-10 overflow-hidden">
 					<button
-						className="absolute min-w-[80%] md:min-w-[93%] rounded-b-md bg-discord-200"
+						className="absolute min-w-[80%] md:min-w-[90%] lg:min-w-[95%] rounded-b-md bg-discord-200"
 						onClick={() => {
 							setShowAmount(showAmount + 5);
 						}}
@@ -111,6 +111,8 @@ const MessageContainer: FC<MessageContainerProps> = (
 							pfp={message.pfp}
 							username={message.username}
 							text={message.text}
+							imageURL={message.imageURL}
+							imageName={message.imageName}
 						/>
 					</div>
 				))}

@@ -6,4 +6,6 @@ export interface Message {
 	pfp: string;
 	username: string;
 	text: string;
+	imageURL: string | null;
+	imageName: string | null;
 }

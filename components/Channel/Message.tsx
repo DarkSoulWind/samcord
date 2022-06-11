@@ -3,6 +3,8 @@ import { FaTrash } from "react-icons/fa";
 import Image from "next/image";
 import { db } from "../../firebase-config";
 import { doc, deleteDoc } from "firebase/firestore";
+import { ref, deleteObject } from "firebase/storage";
+import { storage } from "../../firebase-config";
 
 interface MessageProps {
 	id: string;
@@ -11,6 +13,8 @@ interface MessageProps {
 	pfp: string;
 	username: string;
 	text: string;
+	imageURL: string | null;
+	imageName: string | null;
 }
 
 const Message: FC<MessageProps> = (props: MessageProps) => {
@@ -21,6 +25,11 @@ const Message: FC<MessageProps> = (props: MessageProps) => {
 
 	const deleteMessage = async () => {
 		const messageRef = doc(db, "messages", props.id);
+		if (props.imageURL) {
+			const imageRef = ref(storage, `images/${props.imageName}`);
+			await deleteObject(imageRef);
+			console.log(`Deleted image: ${props.imageName}`);
+		}
 		await deleteDoc(messageRef).then(() => {
 			console.log("Message deleted successfully.");
 		});
@@ -32,7 +41,7 @@ const Message: FC<MessageProps> = (props: MessageProps) => {
 			<div className="mx-3">
 				<div className="relative z-0 w-12 h-12">
 					<Image
-						className="rounded-full aspect-square group-scope-hover:cursor-pointer"
+						className="rounded-full aspect-square group-hover:cursor-pointer"
 						alt={props.username}
 						loading="lazy"
 						src={props.pfp}
@@ -43,7 +52,7 @@ const Message: FC<MessageProps> = (props: MessageProps) => {
 			</div>
 
 			{/* MESSAGE DATA */}
-			<div className="w-11/12 flex flex-col justify-start gap-0">
+			<div className="w-11/12 flex flex-col justify-start gap-0 mr-4">
 				<div className="pr-4">
 					<span className="font-bold hover:cursor-pointer hover:underline">
 						{props.username}
@@ -58,6 +67,18 @@ const Message: FC<MessageProps> = (props: MessageProps) => {
 					</span>
 					<div>{props.text}</div>
 				</div>
+
+				{/* IMAGE ATTACHMENT */}
+				{props.imageURL && (
+					<div className="relative my-2 xs:my-0 h-80 max-h-96">
+						<Image
+							src={props.imageURL}
+							loading="lazy"
+							layout="fill"
+							objectFit="contain"
+						/>
+					</div>
+				)}
 			</div>
 
 			{/* SHOW DELETE BUTTON IF THE MESSAGE BELONGS TO CURRENT USER */}
