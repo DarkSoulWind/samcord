@@ -14,14 +14,10 @@ const Modal: FC<ModalProps> = (props: ModalProps) => {
 	return (
 		<div
 			className={`${
-				props.isOpen ? "scale-100" : "scale-0"
-			} absolute w-screen h-screen transition-all duration-500 z-30 flex items-center justify-center`}
+				props.isOpen ? "z-30 bg-opacity-80" : "-z-30 bg-opacity-0"
+			} absolute w-screen bg-black h-screen transition-all ease-in-out flex items-center justify-center`}
 		>
-			<div
-				className={`absolute w-full h-full ${
-					props.isOpen ? "bg-opacity-80" : "bg-opacity-0"
-				} transition-opacity duration-1000 bg-black`}
-			></div>
+			<div className={`absolute w-full h-full`}></div>
 			<div
 				className={`${
 					props.isOpen ? "scale-100" : "scale-0"

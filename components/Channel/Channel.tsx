@@ -172,45 +172,9 @@ const Channel: FC<ChannelProps> = (props: ChannelProps) => {
 				setViewingImage={setViewingImage}
 			/>
 
-			{/* SHOW IMAGE ATTACHMENT */}
-			{selectedImage && (
-				<div>
-					<div className="flex w-full bg-discord-300 flex-start p-3">
-						<div className="bg-discord-600 rounded-md pt-2 px-5">
-							<img src={selectedImage.src} className="max-h-40" />
-							<div className="text-xs my-2">
-								{selectedImage.name}
-							</div>
-						</div>
-						{/* REMOVE ATTACHMENT BUTTON */}
-						<div
-							className="relative"
-							onClick={(e) => {
-								setSelectedImage(null);
-								imageInputRef.current!.value = "";
-								imageInputRef.current!.files = null;
-							}}
-						>
-							<div className="absolute -top-1 -right-3 bg-discord-500 hover:bg-discord-300 p-1 rounded-sm border-[1px] border-discord-700 group">
-								<FaTrash className="fill-red-600" />
-								<div className="absolute scale-0 group-hover:scale-100 transition-all -right-6 bg-discord-800 p-1 rounded-md text-xs text-white -top-11">
-									Remove Attachment
-								</div>
-							</div>
-						</div>
-					</div>
-					{/* PROGRESS BAR */}
-					<div className="flex mb-2 justify-start w-full">
-						<div
-							className={`w-[${imageUploadProgress}%] bg-discord-200 h-1 transition-all`}
-						></div>
-					</div>
-				</div>
-			)}
-
 			{/* Text input box */}
 			<form
-				className="mt-auto px-3 w-full flex"
+				className="px-3 gap-2 w-full flex mb-2"
 				autoComplete="off"
 				autoCapitalize="off"
 				spellCheck="false"
@@ -220,47 +184,97 @@ const Channel: FC<ChannelProps> = (props: ChannelProps) => {
 					submitMessage();
 				}}
 			>
-				{/* IMAGE UPLOAD BUTTON */}
-				<div
-					onClick={() => imageInputRef.current?.click()}
-					className={`${
-						props.user ? "block" : "hidden"
-					} bg-discord-200 hover:cursor-pointer hover:opacity-60 w-10 h-10 transition-all rounded-full aspect-square mr-2 flex items-center justify-center`}
-				>
-					<FaPlus className="w-5 h-5" />
+				<div className="flex flex-col w-full">
+					{/* SHOW IMAGE ATTACHMENT */}
+					{selectedImage && (
+						<div>
+							<div className="flex w-full rounded-t-md bg-discord-300 flex-start p-3">
+								<div className="bg-discord-600 rounded-md pt-2 px-5">
+									<img
+										src={selectedImage.src}
+										className="max-h-40"
+									/>
+									<div className="text-xs my-2">
+										{selectedImage.name}
+									</div>
+								</div>
+								{/* REMOVE ATTACHMENT BUTTON */}
+								<div
+									className="relative"
+									onClick={(e) => {
+										setSelectedImage(null);
+										imageInputRef.current!.value = "";
+										imageInputRef.current!.files = null;
+									}}
+								>
+									<div className="absolute -top-1 -right-3 bg-discord-500 hover:bg-discord-300 p-1 rounded-sm border-[1px] border-discord-700 group">
+										<FaTrash className="fill-red-600" />
+										<div className="absolute scale-0 group-hover:scale-100 transition-all -right-6 bg-discord-800 p-1 rounded-md text-xs text-white -top-11">
+											Remove Attachment
+										</div>
+									</div>
+								</div>
+							</div>
+							{/* PROGRESS BAR */}
+							{imageUploadProgress > 0 && (
+								<div className="flex justify-start w-full">
+									<div
+										className={`w-[${imageUploadProgress}%] bg-discord-200 h-1 transition-all`}
+									></div>
+								</div>
+							)}
+						</div>
+					)}
+					{/* TEXTBOX */}
+					<div
+						className={`w-full h-10 flex items-center ${
+							selectedImage
+								? "rounded-b-md border-t-[1px] border-discord-15"
+								: "rounded-md"
+						} bg-discord-300 px-3`}
+					>
+						{/* IMAGE UPLOAD BUTTON */}
+						<div
+							onClick={() => imageInputRef.current?.click()}
+							className={`${
+								props.user ? "block" : "hidden"
+							} bg-discord-100 hover:cursor-pointer hover:bg-white w-5 h-5 transition-all rounded-full aspect-square flex items-center justify-center`}
+						>
+							<FaPlus className="w-3 h-3 fill-discord-300" />
 
-					<input
-						type="file"
-						className="w-full h-full hidden opacity-0 file:hidden"
-						onChange={handleImage}
-						ref={imageInputRef}
-						name=""
-						id=""
-					/>
+							<input
+								type="file"
+								className="w-full h-full hidden opacity-0 file:hidden"
+								onChange={handleImage}
+								ref={imageInputRef}
+								name=""
+								id=""
+							/>
+						</div>
+						{/* TEXT INPUT */}
+						<input
+							className="text-white w-full outline-none rounded-md bg-transparent mx-3 text-xs"
+							type="text"
+							placeholder={
+								props.user
+									? `Message #${props.name}`
+									: "You must be logged in to send messages"
+							}
+							value={textInput}
+							onChange={(e) => {
+								setTextInput(e.target.value);
+							}}
+							disabled={!props.user}
+							ref={textInputRef}
+						/>
+					</div>
 				</div>
-
-				{/* TEXT INPUT */}
-				<input
-					className="mt-auto text-white placeholder:text-opacity-0 w-full mr-2 mb-2 outline-none rounded-md bg-discord-300 py-3 px-4 text-xs"
-					type="text"
-					placeholder={
-						props.user
-							? `Message #${props.name}`
-							: "You must be logged in to send messages"
-					}
-					value={textInput}
-					onChange={(e) => {
-						setTextInput(e.target.value);
-					}}
-					disabled={!props.user}
-					ref={textInputRef}
-				/>
 				{/* SUBMIT BUTTON */}
 				<button
 					type="submit"
 					className={`${
 						props.user ? "block" : "hidden"
-					} w-10 h-10 aspect-square bg-discord-200 rounded-full flex justify-center hover:opacity-60 transition-all items-center`}
+					} mt-auto w-10 h-10 aspect-square bg-discord-200 rounded-full flex justify-center hover:opacity-60 transition-all items-center`}
 					disabled={!props.user}
 				>
 					<FaPaperPlane className="w-5 h-5 fill-white active:opacity-50 transition-all ease-in" />

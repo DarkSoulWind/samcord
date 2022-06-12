@@ -59,7 +59,8 @@ const MessageContainer: FC<MessageContainerProps> = (
 		.reverse() as MessageModel[];
 
 	return (
-		<div className="h-[95%] flex flex-col justify-start overflow-y-scroll overflow-x-clip mb-2 scrollbar">
+		<div className="h-full flex flex-col justify-start overflow-y-scroll overflow-x-clip scrollbar">
+			{/* SHOW THE LOADING ANIMATION WHILE MESSAGESE ARE LOADING */}
 			{loading && <LoadingAnimation />}
 
 			{/* SHOW MORE MESSAGES BUTTON */}
@@ -79,6 +80,7 @@ const MessageContainer: FC<MessageContainerProps> = (
 				</div>
 			)}
 
+			{/* WELCOME TO CHANNEL MESSAGE */}
 			{!loading && (
 				<div className="mt-auto text-left pt-3">
 					<div className="flex-col">
@@ -127,7 +129,7 @@ const MessageContainer: FC<MessageContainerProps> = (
 					</div>
 				))}
 			{/* SCROLL TO BOTTOM */}
-			<div ref={props.scrollToBottomRef}></div>
+			<div className="" ref={props.scrollToBottomRef}></div>
 		</div>
 	);
 };

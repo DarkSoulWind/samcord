@@ -1,4 +1,4 @@
-import React, { FC, Dispatch, SetStateAction } from "react";
+import React, { FC, Dispatch, SetStateAction, useState } from "react";
 import { FaTrash } from "react-icons/fa";
 import Image from "next/image";
 import { db } from "../../firebase-config";
@@ -23,6 +23,10 @@ const Message: FC<MessageProps> = (props: MessageProps) => {
 	let dateString = `${props.date.getHours()}:${
 		props.date.getMinutes().toLocaleString().length < 2 ? "0" : ""
 	}${props.date.getMinutes()}`;
+	const [note, setNote] = useState("");
+	const [showMiniprofile, setShowMiniprofile] = useState(false);
+	const [useWidth, setUseWidth] = useState(10);
+	const [useHeight, setUseHeight] = useState(10);
 
 	const deleteMessage = async () => {
 		const messageRef = doc(db, "messages", props.id);
@@ -43,6 +47,7 @@ const Message: FC<MessageProps> = (props: MessageProps) => {
 				<div className="relative z-0 w-12 h-12">
 					<Image
 						className="rounded-full aspect-square group-hover:cursor-pointer"
+						onClick={() => setShowMiniprofile(!showMiniprofile)}
 						alt={props.username}
 						loading="lazy"
 						src={props.pfp}
@@ -50,12 +55,45 @@ const Message: FC<MessageProps> = (props: MessageProps) => {
 						height="100%"
 					/>
 				</div>
+				{/* MINI PROFILE */}
+				<div
+					className={`relative z-20 ${
+						showMiniprofile
+							? "translate-x-6 opacity-100"
+							: "opacity-0 -z-10"
+					} transition-all`}
+				>
+					<div className="absolute -bottom-16 left-10 flex flex-col h-40 w-60">
+						<div className="h-1/4 bg-black rounded-t"></div>
+						<div className="h-3/4 bg-discord-800 rounded-b px-4">
+							<div className="uppercase text-lg font-bold mb-2">
+								{props.username}
+							</div>
+							<div className="flex justify-center w-full mb-1">
+								<div className="w-full border-b-[1px] border-discord-500"></div>
+							</div>
+							<div className="text-[0.7rem] font-extrabold text-discord-100 uppercase">
+								note
+							</div>
+							{/* SAVE NOTES TO LOCALSTORAGE */}
+							<textarea
+								className="text-white text-xs w-full bg-transparent resize-none focus:bg-discord-700 outline-none rounded-sm"
+								placeholder="Click to add a note"
+								value={note}
+								onChange={(e) => setNote(e.target.value)}
+							></textarea>
+						</div>
+					</div>
+				</div>
 			</div>
 
 			{/* MESSAGE DATA */}
 			<div className="w-11/12 flex flex-col justify-start gap-0 mr-4">
 				<div className="pr-4">
-					<span className="font-bold hover:cursor-pointer hover:underline">
+					<span
+						onClick={() => setShowMiniprofile(!showMiniprofile)}
+						className="font-bold hover:cursor-pointer hover:underline"
+					>
 						{props.username}
 					</span>{" "}
 					<span className="text-[0.6rem] text-discord-100">
@@ -71,18 +109,28 @@ const Message: FC<MessageProps> = (props: MessageProps) => {
 
 				{/* IMAGE ATTACHMENT */}
 				{props.imageURL && (
-					<div
-						onClick={() =>
-							props.setViewingImage(props.imageURL as string)
-						}
-						className="relative mt-3 hover:cursor-pointer w-full flex flex-start"
-					>
-						<div className="my-2 xs:my-0 h-80 pr-auto max-h-96">
+					<div className="relative mt-3 flex flex-start">
+						<div className={`overflow-hidden`}>
 							<Image
+								onClick={() =>
+									props.setViewingImage(
+										props.imageURL as string
+									)
+								}
+								className="hover:cursor-pointer"
 								src={props.imageURL}
 								loading="lazy"
-								layout="fill"
-								objectFit="contain"
+								width="200%"
+								height={`${200 * (useHeight / useWidth)}%`}
+								onLoad={(e) => {
+									// get width and height of the image
+									const img = e.target as HTMLImageElement;
+									const width = img.naturalWidth;
+									const height = img.naturalHeight;
+									setUseWidth(width);
+									setUseHeight(height);
+									console.log(useWidth, useHeight);
+								}}
 							/>
 						</div>
 					</div>
