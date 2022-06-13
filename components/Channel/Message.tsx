@@ -16,6 +16,8 @@ interface MessageProps {
 	imageURL: string | null;
 	imageName: string | null;
 	setViewingImage: Dispatch<SetStateAction<string>>;
+	notes: { [key: string]: string };
+	setNotes: Dispatch<SetStateAction<{ [key: string]: string }>>;
 }
 
 const Message: FC<MessageProps> = (props: MessageProps) => {
@@ -23,7 +25,6 @@ const Message: FC<MessageProps> = (props: MessageProps) => {
 	let dateString = `${props.date.getHours()}:${
 		props.date.getMinutes().toLocaleString().length < 2 ? "0" : ""
 	}${props.date.getMinutes()}`;
-	const [note, setNote] = useState("");
 	const [showMiniprofile, setShowMiniprofile] = useState(false);
 	const [useWidth, setUseWidth] = useState(10);
 	const [useHeight, setUseHeight] = useState(10);
@@ -79,8 +80,24 @@ const Message: FC<MessageProps> = (props: MessageProps) => {
 							<textarea
 								className="text-white text-xs w-full bg-transparent resize-none focus:bg-discord-700 outline-none rounded-sm"
 								placeholder="Click to add a note"
-								value={note}
-								onChange={(e) => setNote(e.target.value)}
+								spellCheck={false}
+								autoCapitalize="none"
+								autoCorrect="off"
+								autoComplete="off"
+								value={props.notes[props.username]}
+								onChange={(e) => {
+									props.setNotes({
+										...props.notes,
+										[props.username]: e.target.value,
+									});
+									localStorage.setItem(
+										"samcord-notes",
+										JSON.stringify({
+											...props.notes,
+											[props.username]: e.target.value,
+										})
+									);
+								}}
 							></textarea>
 						</div>
 					</div>

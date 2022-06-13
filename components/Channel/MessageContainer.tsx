@@ -4,6 +4,7 @@ import React, {
 	useState,
 	Dispatch,
 	SetStateAction,
+	useEffect,
 } from "react";
 import { FaHashtag, FaCuttlefish } from "react-icons/fa";
 import { useCollection } from "react-firebase-hooks/firestore";
@@ -41,6 +42,9 @@ const MessageContainer: FC<MessageContainerProps> = (
 	props: MessageContainerProps
 ) => {
 	const [showAmount, setShowAmount] = useState(20);
+	const [notes, setNotes] = useState<{ [key: string]: string }>({});
+
+	// FETCHING MESSAGES
 	const showMore = 20;
 	const messagesRef = collection(db, "messages");
 	const messageQuery = query(
@@ -58,6 +62,10 @@ const MessageContainer: FC<MessageContainerProps> = (
 		}))
 		.reverse() as MessageModel[];
 
+	useEffect(() => {
+		setNotes(JSON.parse(localStorage.getItem("samcord-notes") || "{}"));
+	}, []);
+
 	return (
 		<div className="h-full flex flex-col justify-start overflow-y-scroll overflow-x-clip scrollbar">
 			{/* SHOW THE LOADING ANIMATION WHILE MESSAGESE ARE LOADING */}
@@ -65,18 +73,20 @@ const MessageContainer: FC<MessageContainerProps> = (
 
 			{/* SHOW MORE MESSAGES BUTTON */}
 			{showAmount <= messages?.length && (
-				<div className="flex justify-center -bottom-10 z-10 overflow-hidden">
-					<button
-						className="absolute min-w-[80%] md:min-w-[90%] lg:min-w-[95%] rounded-b-md bg-discord-200"
-						onClick={() => {
-							setShowAmount(showAmount + showMore);
-						}}
-					>
-						<div className="flex justify-between text-xs px-2 py-1">
-							<div>Show more messages</div>
-							<div className="font-bold">Mark as Read</div>
-						</div>
-					</button>
+				<div className="flex justify-center z-10 overflow-hidden">
+					<div className="fixed w-full top-[2.2rem] min-w-[300px] px-12">
+						<button
+							className=" min-w-full rounded-b-md bg-discord-200"
+							onClick={() => {
+								setShowAmount(showAmount + showMore);
+							}}
+						>
+							<div className="flex justify-between text-xs px-2 py-1">
+								<div>Show more messages</div>
+								<div className="font-bold">Mark as Read</div>
+							</div>
+						</button>
+					</div>
 				</div>
 			)}
 
@@ -102,6 +112,7 @@ const MessageContainer: FC<MessageContainerProps> = (
 			{!loading &&
 				messages?.map((message, i) => (
 					<div key={message.id}>
+						{/* SHOW THE DATE SEPARATOR ON A NEW DAY */}
 						{messages[i - 1]?.date.toDate().getDate() !=
 							message.date.toDate().getDate() && (
 							<DateSeparator
@@ -125,6 +136,8 @@ const MessageContainer: FC<MessageContainerProps> = (
 							imageURL={message.imageURL}
 							imageName={message.imageName}
 							setViewingImage={props.setViewingImage}
+							notes={notes}
+							setNotes={setNotes}
 						/>
 					</div>
 				))}
