@@ -64,11 +64,14 @@ const MessageContainer: FC<MessageContainerProps> = (
 
 	useEffect(() => {
 		setNotes(JSON.parse(localStorage.getItem("samcord-notes") || "{}"));
+		console.log(error);
 	}, []);
 
 	return (
 		<div className="h-full flex flex-col justify-start overflow-y-scroll overflow-x-clip scrollbar">
 			{/* SHOW THE LOADING ANIMATION WHILE MESSAGESE ARE LOADING */}
+			{error && <LoadingAnimation />}
+
 			{loading && <LoadingAnimation />}
 
 			{/* SHOW MORE MESSAGES BUTTON */}

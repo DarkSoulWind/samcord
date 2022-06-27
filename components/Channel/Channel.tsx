@@ -8,6 +8,7 @@ import Image from "next/image";
 import { CensorSensor } from "censor-sensor";
 
 import MessageContainer from "./MessageContainer";
+import InvalidFile from "../InvalidFile";
 
 interface ChannelProps {
 	name: string;
@@ -25,10 +26,12 @@ const acceptableExtensions = [".jpg", ".jpeg", ".png"];
 const Channel: FC<ChannelProps> = (props: ChannelProps) => {
 	const [textInput, setTextInput] = useState("");
 	const [imageUploadProgress, setImageUploadProgress] = useState(0);
+	const [sendingMessage, setSendingMessage] = useState(false);
 	const [selectedImage, setSelectedImage] = useState<SelectedImage | null>(
 		null
 	);
 	const [viewingImage, setViewingImage] = useState("");
+	const [showInvalidFile, setShowInvalidFile] = useState(true);
 
 	const messagesRef = collection(db, "messages");
 	const scrollToBottomRef = useRef<null | HTMLDivElement>(null);
@@ -46,6 +49,8 @@ const Channel: FC<ChannelProps> = (props: ChannelProps) => {
 				return true;
 			}
 		}
+
+		setShowInvalidFile(true);
 		return false;
 	};
 
@@ -102,8 +107,9 @@ const Channel: FC<ChannelProps> = (props: ChannelProps) => {
 	};
 
 	const submitMessage = async () => {
-		if (textInput.trim() === "") return;
+		if (textInput.trim() === "" && !imageInputRef.current?.files) return;
 
+		setSendingMessage(true);
 		let imageURL = await fileUpload(selectedImage);
 		let imageName = selectedImage?.name;
 		console.log(imageName);
@@ -122,6 +128,7 @@ const Channel: FC<ChannelProps> = (props: ChannelProps) => {
 		textInputRef.current?.focus();
 		setTextInput("");
 		setSelectedImage(null);
+		setSendingMessage(false);
 		setImageUploadProgress(0);
 	};
 
@@ -132,6 +139,8 @@ const Channel: FC<ChannelProps> = (props: ChannelProps) => {
 				<FaHashtag className="w-4 h-4 fill-discord-100 ml-3" />
 				<div className="font-bold text-sm">{props.name}</div>
 			</div>
+
+			<InvalidFile show={showInvalidFile} setShow={setShowInvalidFile} />
 
 			{/* IMAGE VIEWER */}
 			<div
@@ -181,6 +190,7 @@ const Channel: FC<ChannelProps> = (props: ChannelProps) => {
 				onSubmit={(e) => {
 					e.preventDefault();
 					if (!props.user) return;
+					if (sendingMessage || imageUploadProgress > 0) return;
 					submitMessage();
 				}}
 			>
@@ -247,6 +257,9 @@ const Channel: FC<ChannelProps> = (props: ChannelProps) => {
 								className="w-full h-full hidden opacity-0 file:hidden"
 								onChange={handleImage}
 								ref={imageInputRef}
+								disabled={
+									sendingMessage || imageUploadProgress > 0
+								}
 								name=""
 								id=""
 							/>
@@ -264,7 +277,11 @@ const Channel: FC<ChannelProps> = (props: ChannelProps) => {
 							onChange={(e) => {
 								setTextInput(e.target.value);
 							}}
-							disabled={!props.user}
+							disabled={
+								!props.user ||
+								sendingMessage ||
+								imageUploadProgress > 0
+							}
 							ref={textInputRef}
 						/>
 					</div>
@@ -275,7 +292,9 @@ const Channel: FC<ChannelProps> = (props: ChannelProps) => {
 					className={`${
 						props.user ? "block" : "hidden"
 					} mt-auto w-10 h-10 aspect-square bg-discord-200 rounded-full flex justify-center hover:opacity-60 transition-all items-center`}
-					disabled={!props.user}
+					disabled={
+						!props.user || sendingMessage || imageUploadProgress > 0
+					}
 				>
 					<FaPaperPlane className="w-5 h-5 fill-white active:opacity-50 transition-all ease-in" />
 				</button>
