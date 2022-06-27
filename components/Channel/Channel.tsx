@@ -31,7 +31,7 @@ const Channel: FC<ChannelProps> = (props: ChannelProps) => {
 		null
 	);
 	const [viewingImage, setViewingImage] = useState("");
-	const [showInvalidFile, setShowInvalidFile] = useState(true);
+	const [showInvalidFile, setShowInvalidFile] = useState(false);
 
 	const messagesRef = collection(db, "messages");
 	const scrollToBottomRef = useRef<null | HTMLDivElement>(null);

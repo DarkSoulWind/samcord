@@ -32,7 +32,7 @@ const InvalidFile: FC<InvalidFileProps> = (props: InvalidFileProps) => {
 						Invalid File Type
 					</div>
 					<div className="text-xs cursor-default">
-						Hmm... I don't think we support that type of file.
+						Hmm... I don&apos;t think we support that type of file.
 					</div>
 				</div>
 			</div>
