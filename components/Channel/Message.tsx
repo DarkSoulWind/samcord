@@ -18,6 +18,7 @@ interface MessageProps {
 	setViewingImage: Dispatch<SetStateAction<string>>;
 	notes: { [key: string]: string };
 	setNotes: Dispatch<SetStateAction<{ [key: string]: string }>>;
+	continued: boolean;
 }
 
 const Message: FC<MessageProps> = (props: MessageProps) => {
@@ -42,10 +43,14 @@ const Message: FC<MessageProps> = (props: MessageProps) => {
 	};
 
 	return (
-		<div className="flex w-full justify-start group hover:bg-discord-600 text-white text-sm py-1 mb-1">
+		<div
+			className={`flex w-full justify-start group hover:bg-discord-600 text-white text-sm ${
+				props.continued ? "py-[0.15rem]" : "mt-3 py-1"
+			}`}
+		>
 			{/* PFP */}
-			<div className="mx-3">
-				<div className="relative z-0 w-12 h-12">
+			<div className={`mx-3 ${props.continued ? "-z-50 h-0" : "z-0"}`}>
+				<div className="relative z-0 w-10 h-10">
 					<Image
 						className="rounded-full aspect-square group-hover:cursor-pointer"
 						onClick={() => setShowMiniprofile(!showMiniprofile)}
@@ -56,6 +61,7 @@ const Message: FC<MessageProps> = (props: MessageProps) => {
 						height="100%"
 					/>
 				</div>
+
 				{/* MINI PROFILE */}
 				<div
 					className={`relative z-20 ${
@@ -67,7 +73,7 @@ const Message: FC<MessageProps> = (props: MessageProps) => {
 					<div className="absolute -bottom-16 left-10 flex flex-col h-40 w-60">
 						<div className="h-1/4 bg-black rounded-t"></div>
 						<div className="h-3/4 bg-discord-800 rounded-b px-4">
-							<div className="uppercase text-lg font-bold mb-2">
+							<div className="uppercase font-bold mb-2">
 								{props.username}
 							</div>
 							<div className="flex justify-center w-full mb-1">
@@ -107,26 +113,38 @@ const Message: FC<MessageProps> = (props: MessageProps) => {
 			{/* MESSAGE DATA */}
 			<div className="w-11/12 flex flex-col justify-start gap-0 mr-4">
 				<div className="pr-4">
-					<span
-						onClick={() => setShowMiniprofile(!showMiniprofile)}
-						className="font-bold hover:cursor-pointer hover:underline"
-					>
-						{props.username}
-					</span>{" "}
-					<span className="text-[0.6rem] text-discord-100">
-						{new Date().getDate() == props.date.getDate()
-							? "Today"
-							: `${props.date.getDate()}/${
-									props.date.getMonth() + 1
-							  }/${props.date.getFullYear()}`}{" "}
-						at {dateString}
-					</span>
-					<div>{props.text}</div>
+					<div className="flex justify-start gap-2">
+						{/* USERNAME */}
+						<div
+							onClick={() => setShowMiniprofile(!showMiniprofile)}
+							className={`font-semibold ${
+								props.continued ? "hidden" : "block"
+							} hover:cursor-pointer hover:underline`}
+						>
+							{props.username}
+						</div>
+
+						{/* DATE */}
+						<div
+							className={`text-[0.6rem] ${
+								props.continued ? "hidden" : "block"
+							} text-discord-100`}
+						>
+							{new Date().getDate() == props.date.getDate()
+								? "Today"
+								: `${props.date.getDate()}/${
+										props.date.getMonth() + 1
+								  }/${props.date.getFullYear()}`}{" "}
+							at {dateString}
+						</div>
+					</div>
+
+					<div className="font-normal">{props.text}</div>
 				</div>
 
 				{/* IMAGE ATTACHMENT */}
 				{props.imageURL && (
-					<div className="relative mt-3 flex flex-start">
+					<div className="relative mt-1 flex flex-start">
 						<div className={`overflow-hidden`}>
 							<Image
 								onClick={() =>

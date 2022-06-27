@@ -141,6 +141,12 @@ const MessageContainer: FC<MessageContainerProps> = (
 							setViewingImage={props.setViewingImage}
 							notes={notes}
 							setNotes={setNotes}
+							continued={
+								messages[i - 1]?.username ===
+									message.username &&
+								messages[i - 1]?.date.toDate().getDate() ==
+									message.date.toDate().getDate()
+							}
 						/>
 					</div>
 				))}
